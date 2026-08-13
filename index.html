@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATLAS FORGE // GAME SPRITE TOOLKIT</title>
+<link rel="icon" href="https://image.qwenlm.ai/public_source/489cac60-deb3-41a5-a4ba-1ace43e46dec/109846419-1a29-45d5-af49-95a13198fb95.png">
+<link href="https://cdn.jsdelivr.net/fontsource/fonts/press-start-2p@latest/latin-400-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/fonts/vt323@latest/latin-400-normal.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d1f; --bg2:#05060f; --panel:#141936; --line:#2b3263;
+  --ink:#fff1e8; --dim:#9aa0c3;
+  --y:#ffec27; --c:#29adff; --g:#00e436; --r:#ff004d; --p:#ff77a8; --m:#7e2553; --o:#ffa300;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'VT323',monospace; font-size:20px; line-height:1.35;
+  background-image:linear-gradient(rgba(43,50,99,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(43,50,99,.14) 1px,transparent 1px);
+  background-size:24px 24px;
+  overflow-x:hidden;
+}
+img,canvas{image-rendering:pixelated}
+::selection{background:var(--y);color:#000}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--line);border:3px solid var(--bg2)}
+::-webkit-scrollbar-thumb:hover{background:var(--y)}
+
+/* CRT overlay */
+.crt{position:fixed;inset:0;pointer-events:none;z-index:998;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);
+}
+.crt::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45) 100%)}
+
+/* HUD header */
+header{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:3px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 20px;flex-wrap:wrap}
+.hud-left{display:flex;align-items:center;gap:14px}
+.hud-left img{width:52px;height:52px;border:3px solid var(--line);box-shadow:3px 3px 0 #000}
+h1{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--y);text-shadow:3px 3px 0 var(--m)}
+.hud-sub{color:var(--dim);font-size:17px}
+nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.navlink{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--dim);text-decoration:none;transition:.1s}
+.navlink:hover{color:var(--y);transform:translateY(-1px)}
+.navlink b{color:var(--p)}
+#sfxBtn{font-family:'Press Start 2P',monospace;font-size:8px;background:var(--bg);color:var(--g);border:2px solid var(--line);padding:6px 8px;cursor:pointer}
+#sfxBtn.off{color:var(--r)}
+
+/* marquee */
+.marquee{overflow:hidden;background:var(--bg2);border-bottom:3px solid var(--line)}
+.marquee-inner{display:flex;width:max-content;animation:mar 28s linear infinite}
+.marquee-inner span{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--y);padding:10px 0;white-space:nowrap}
+@keyframes mar{to{transform:translateX(-50%)}}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;padding:56px 0 40px}
+.hero-frame img{width:100%;display:block;border:4px solid var(--line);box-shadow:8px 8px 0 var(--bg2)}
+.term-line{color:var(--g);margin-bottom:10px}
+.hero h2{font-family:'Press Start 2P',monospace;font-size:clamp(20px,3.4vw,34px);line-height:1.4;text-shadow:4px 4px 0 var(--m);margin-bottom:16px}
+.hero h2 em{color:var(--c);font-style:normal}
+.lede{color:var(--dim);margin-bottom:22px;max-width:56ch}
+.lede b{color:var(--ink)}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.hero-meta{color:var(--dim);font-size:17px;border-top:2px dashed var(--line);padding-top:12px}
+.hero-meta i{color:var(--p);font-style:normal}
+.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* buttons */
+.btn{font-family:'Press Start 2P',monospace;font-size:10px;padding:12px 16px;border:3px solid var(--bg2);
+  box-shadow:0 4px 0 var(--bg2);cursor:pointer;text-transform:uppercase;color:var(--bg2);
+  text-decoration:none;display:inline-block;background:var(--c);transition:.08s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--bg2)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--bg2)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:0 4px 0 var(--bg2)}
+.btn-y{background:var(--y)} .btn-c{background:var(--c)} .btn-g{background:var(--g)}
+.btn-r{background:var(--r);color:#fff} .btn-p{background:var(--p)}
+.btn-sm{font-size:8px;padding:8px 10px}
+.btn-big{width:100%;font-size:12px;padding:16px}
+
+/* sections */
+section.tool{padding:34px 0 10px}
+.tool-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.tool-num{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--p)}
+.tool-head h2{font-family:'Press Start 2P',monospace;font-size:14px;color:var(--ink)}
+.tool-tag{color:var(--dim)}
+.tool-grid{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
+.tool-grid.rev{grid-template-columns:440px 1fr}
+.col{display:flex;flex-direction:column;gap:22px;min-width:0}
+
+/* panels */
+.panel{background:var(--panel);border:3px solid var(--line);box-shadow:0 0 0 3px var(--bg2),8px 8px 0 var(--bg2);padding:18px;position:relative}
+.panel h3{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--y);border-bottom:2px dashed var(--line);padding-bottom:12px;margin-bottom:14px}
+.panel h3::before{content:"// ";color:var(--c)}
+
+/* dropzone */
+.drop{border:3px dashed var(--c);background:rgba(41,173,255,.06);padding:22px 14px;text-align:center;color:var(--dim);display:flex;flex-direction:column;gap:12px;align-items:center}
+.drop.dragover{border-color:var(--y);background:rgba(255,236,39,.1);color:var(--y)}
+.drop .btn{pointer-events:auto}
+
+/* sprite list */
+.sprite-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:10px;margin:14px 0}
+.sp-item{border:2px solid var(--line);background:var(--bg2);padding:6px;position:relative;display:flex;flex-direction:column;gap:4px}
+.sp-item canvas{width:100%;height:52px;object-fit:contain;background:repeating-conic-gradient(#1a1f3d 0% 25%,#12162e 0% 50%) 0 0/12px 12px}
+.sp-meta{display:flex;flex-direction:column}
+.sp-name{font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-size{font-size:14px;color:var(--dim)}
+.sp-x{position:absolute;top:3px;right:3px;background:var(--r);color:#fff;border:2px solid var(--bg2);font-family:'Press Start 2P',monospace;font-size:7px;padding:3px 4px;cursor:pointer}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--dim)}
+
+/* controls */
+.ctl{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:11px 0;color:var(--dim)}
+.ctl label{font-size:18px}
+.ctl output{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--y);background:var(--bg2);border:2px solid var(--line);padding:4px 6px;min-width:44px;text-align:center}
+input[type=range]{accent-color:var(--y);width:130px;cursor:pointer}
+input[type=checkbox]{accent-color:var(--g);width:18px;height:18px;cursor:pointer}
+select{background:var(--bg2);color:var(--ink);border:3px solid var(--line);font-family:'VT323',monospace;font-size:18px;padding:6px 8px;cursor:pointer}
+select:focus{outline:2px solid var(--y)}
+
+/* canvas */
+.canvas-wrap{border:3px solid var(--line);background:repeating-conic-gradient(#1a1f3d 0% 25%,#12162e 0% 50%) 0 0/16px 16px;padding:8px;min-height:120px;display:flex;align-items:center;justify-content:center}
+.canvas-wrap canvas{display:block;max-width:100%;max-height:520px;cursor:crosshair}
+.status{margin-top:10px;color:var(--g);background:var(--bg2);border:2px solid var(--line);padding:6px 10px;font-size:17px;white-space:nowrap;overflow:hidden}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--bg2);border:2px solid var(--line);padding:8px 10px}
+.stat b{display:block;font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);margin-bottom:6px}
+.stat span{font-size:20px;color:var(--y)}
+
+.dl-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+
+/* table */
+.tbl-wrap{max-height:340px;overflow:auto;border:2px solid var(--line)}
+table{width:100%;border-collapse:collapse}
+th{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);text-align:left;padding:8px 10px;background:var(--bg2);position:sticky;top:0}
+td{padding:5px 10px;border-top:1px dashed var(--line);font-size:18px;color:var(--ink)}
+tbody tr:hover{background:rgba(255,236,39,.12)}
+
+/* docs */
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.ok-chip{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--g);border:2px solid var(--g);padding:4px 6px;display:inline-block;margin-bottom:10px}
+.panel p{color:var(--dim)}
+.panel p b{color:var(--ink)}
+.svc{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--p);margin-bottom:10px}
+
+/* footer */
+footer{margin-top:70px;border-top:3px solid var(--line);background:var(--bg2);padding:26px 20px;text-align:center;color:var(--dim)}
+footer .coin{color:var(--y)}
+
+/* toast */
+#toast{position:fixed;right:18px;bottom:18px;z-index:999;background:var(--bg2);border:3px solid var(--y);
+  color:var(--y);font-family:'Press Start 2P',monospace;font-size:9px;padding:12px 16px;box-shadow:5px 5px 0 #000;
+  opacity:0;transform:translateY(12px);transition:.2s;pointer-events:none;max-width:80vw}
+#toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:980px){
+  .hero{grid-template-columns:1fr}
+  .tool-grid,.tool-grid.rev{grid-template-columns:1fr}
+  .docs-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="crt"></div>
+
+<header>
+  <div class="hud-left">
+    <img src="https://image.qwenlm.ai/public_source/489cac60-deb3-41a5-a4ba-1ace43e46dec/109846419-1a29-45d5-af49-95a13198fb95.png" alt="ATLAS FORGE logo">
+    <div>
+      <h1>ATLAS FORGE</h1>
+      <div class="hud-sub">sprite toolkit v2.6 // for game devs</div>
+    </div>
+  </div>
+  <nav>
+    <a class="navlink" href="#tool-packer"><b>001</b> ——- packer</a>
+    <a class="navlink" href="#tool-analyzer"><b>002</b> ——- analyzer</a>
+    <a class="navlink" href="#docs"><b>003</b> ——- manual</a>
+    <button id="sfxBtn" title="toggle sound">SFX:ON</button>
+  </nav>
+</header>
+
+<div class="marquee"><div class="marquee-inner">
+  <span>*** ATLAS FORGE *** FREE FOREVER *** PACK LOOSE SPRITES → ATLAS PNG + JSON *** ANALYZE ANY SPRITESHEET FRAME BY FRAME *** AUTO-DETECT WIDTH × HEIGHT OF EVERY SPRITE *** 100% IN-BROWSER — NO UPLOADS *** INSERT COIN ***&nbsp;</span>
+  <span>*** ATLAS FORGE *** FREE FOREVER *** PACK LOOSE SPRITES → ATLAS PNG + JSON *** ANALYZE ANY SPRITESHEET FRAME BY FRAME *** AUTO-DETECT WIDTH × HEIGHT OF EVERY SPRITE *** 100% IN-BROWSER — NO UPLOADS *** INSERT COIN ***&nbsp;</span>
+</div></div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-frame">
+      <img src="https://image.qwenlm.ai/public_source/489cac60-deb3-41a5-a4ba-1ace43e46dec/14bd52bb3-8f8f-47f2-9d87-d57e7ab9aa32.png" alt="pixel art workbench with glowing sprite atlases">
+    </div>
+    <div>
+      <div class="term-line">initialize:// atlas_forge.exe <span class="blink">▮</span><br>scroll to begin ▼</div>
+      <h2>PACK. ANALYZE.<br><em>SHIP YOUR GAME.</em></h2>
+      <p class="lede">A free online <b>texture atlas forge</b> for game developers. Pack loose sprites into tight, engine-ready atlases — or <b>reverse-engineer any spritesheet</b>: the analyzer scans frame by frame, counts every sprite, measures each frame's width × height, draws the bounding frames and rebuilds the JSON.</p>
+      <div class="hero-btns">
+        <a class="btn btn-y" href="#tool-packer">▶ start packing</a>
+        <a class="btn btn-c" href="#tool-analyzer">▶ analyze atlas</a>
+      </div>
+      <div class="hero-meta">location // <i>world wide</i> ——- price // <i>always free</i> ——- last updated ——- <i>08.14.26</i></div>
+    </div>
+  </section>
+
+  <!-- 001 PACKER -->
+  <section class="tool" id="tool-packer">
+    <div class="tool-head"><span class="tool-num">001</span><h2>// TEXTURE PACKER</h2><span class="tool-tag">loose sprites → atlas png + json</span></div>
+    <div class="tool-grid">
+      <div class="col">
+        <div class="panel">
+          <h3>INPUT // SPRITES</h3>
+          <div class="drop" id="packDrop">
+            <div>DRAG &amp; DROP SPRITE PNGs HERE</div>
+            <button class="btn btn-y" id="packBrowse">[ browse files ]</button>
+            <button class="btn btn-g" id="loadDemo">[ load demo sprites ]</button>
+            <input type="file" id="packFiles" accept="image/*" multiple hidden>
+          </div>
+          <div class="sprite-list" id="spriteList"></div>
+          <div class="row-between">
+            <span id="spriteCount">0 sprites loaded</span>
+            <button class="btn btn-r btn-sm" id="clearSprites">CLEAR</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>SETTINGS // PACK</h3>
+          <div class="ctl"><label>PADDING (px)</label><input type="range" id="optPad" min="0" max="8" value="2"><output id="optPadV">2</output></div>
+          <div class="ctl"><label>EXTRUDE (px)</label><input type="range" id="optExt" min="0" max="4" value="1"><output id="optExtV">1</output></div>
+          <div class="ctl"><label>ATLAS SIZE</label>
+            <select id="optSize">
+              <option value="auto" selected>AUTO FIT</option>
+              <option value="128">128 × 128</option><option value="256">256 × 256</option>
+              <option value="512">512 × 512</option><option value="1024">1024 × 1024</option>
+              <option value="2048">2048 × 2048</option><option value="4096">4096 × 4096</option>
+            </select>
+          </div>
+          <div class="ctl"><label>POWER OF TWO</label><input type="checkbox" id="optPot" checked></div>
+          <div class="ctl"><label>ALLOW 90° ROTATION</label><input type="checkbox" id="optRot"></div>
+          <div class="ctl"><label>TRIM TRANSPARENCY</label><input type="checkbox" id="optTrim" checked></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="panel">
+          <h3>OUTPUT // ATLAS</h3>
+          <button class="btn btn-y btn-big" id="packBtn">▶ FORGE ATLAS</button>
+          <div class="canvas-wrap" style="margin-top:14px"><canvas id="packCanvas" width="480" height="270"></canvas></div>
+          <div class="stats" id="packStats"></div>
+          <div class="dl-row">
+            <select id="jsonFormat">
+              <option value="hash" selected>JSON // PHASER HASH</option>
+              <option value="array">JSON // ARRAY</option>
+              <option value="simple">JSON // SIMPLE</option>
+            </select>
+            <button class="btn btn-c" id="dlPng" disabled>⬇ PNG</button>
+            <button class="btn btn-c" id="dlJson" disabled>⬇ JSON</button>
+            <button class="btn btn-p" id="copyJson" disabled>COPY JSON</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 002 ANALYZER -->
+  <section class="tool" id="tool-analyzer">
+    <div class="tool-head"><span class="tool-num">002</span><h2>// ATLAS ANALYZER</h2><span class="tool-tag">atlas → frames + json (frame-by-frame scan)</span></div>
+    <div class="tool-grid rev">
+      <div class="col">
+        <div class="panel">
+          <h3>INPUT // ATLAS IMAGE</h3>
+          <div class="drop" id="anaDrop">
+            <div>DROP A SPRITESHEET / ATLAS PNG</div>
+            <button class="btn btn-c" id="anaBrowse">[ browse atlas ]</button>
+            <button class="btn btn-g" id="usePackBtn">[ use forged atlas ↑ ]</button>
+            <input type="file" id="anaFiles" accept="image/*" hidden>
+          </div>
+          <div style="margin-top:14px">
+            <div class="ctl"><label>BG MODE</label>
+              <select id="anaMode">
+                <option value="alpha" selected>TRANSPARENT BG</option>
+                <option value="key">SOLID BG (COLOR KEY)</option>
+              </select>
+            </div>
+            <div class="ctl"><label>ALPHA THRESHOLD</label><input type="range" id="anaAlpha" min="1" max="255" value="8"><output id="anaAlphaV">8</output></div>
+            <div class="ctl" id="tolRow" style="opacity:.35"><label>COLOR TOLERANCE</label><input type="range" id="anaTol" min="1" max="120" value="32"><output id="anaTolV">32</output></div>
+            <div class="ctl"><label>MERGE GAP (px)</label><input type="range" id="anaGap" min="0" max="8" value="1"><output id="anaGapV">1</output></div>
+            <div class="ctl"><label>MIN SPRITE AREA</label><input type="range" id="anaMin" min="1" max="64" value="4"><output id="anaMinV">4</output></div>
+          </div>
+          <button class="btn btn-c btn-big" id="analyzeBtn" style="margin-top:10px">▶ ANALYZE FRAMES</button>
+        </div>
+        <div class="panel">
+          <h3>OUTPUT // FRAMES + JSON</h3>
+          <div class="stats" id="anaStats"></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>#</th><th>NAME</th><th>X</th><th>Y</th><th>W × H</th><th>PIXELS</th></tr></thead>
+            <tbody id="anaTableBody"></tbody>
+          </table></div>
+          <div class="dl-row" style="margin-top:12px">
+            <button class="btn btn-c" id="anaDlJson" disabled>⬇ JSON</button>
+            <button class="btn btn-p" id="anaCopyJson" disabled>COPY JSON</button>
+            <button class="btn btn-y" id="anaDlPng" disabled>⬇ ANNOTATED PNG</button>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="panel">
+          <h3>PREVIEW // DETECTED FRAMES</h3>
+          <div class="canvas-wrap"><canvas id="anaCanvas" width="480" height="270"></canvas></div>
+          <div class="status" id="anaStatus">X:— Y:— // AWAITING ATLAS…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 003 MANUAL -->
+  <section class="tool" id="docs">
+    <div class="tool-head"><span class="tool-num">003</span><h2>// FIELD MANUAL</h2><span class="tool-tag">how the forge works</span></div>
+    <div class="docs-grid">
+      <div class="panel">
+        <div class="svc">s//01 ——- packer</div>
+        <span class="ok-chip">[ ok ]</span>
+        <p>Drop loose PNG sprites. A <b>MaxRects bin-packer</b> arranges them with <b>padding</b>, edge <b>extrude</b> (kills mip-map seams), <b>trim</b>, optional <b>90° rotation</b> and <b>power-of-two</b> sizes. Exports the atlas PNG plus engine-ready JSON.</p>
+      </div>
+      <div class="panel">
+        <div class="svc">s//02 ——- analyzer</div>
+        <span class="ok-chip">[ ok ]</span>
+        <p>A <b>flood-fill scan</b> reads every pixel, groups connected sprites frame by frame, <b>counts them</b>, measures each frame's <b>width × height</b>, draws the bounding <b>frames</b> over the atlas and rebuilds the JSON — perfect for legacy or ripped sheets.</p>
+      </div>
+      <div class="panel">
+        <div class="svc">s//03 ——- json formats</div>
+        <span class="ok-chip">[ ok ]</span>
+        <p><b>Phaser / TexturePacker hash</b>, <b>array</b> or <b>simple</b> JSON with frame, rotation, trim + source-size data. Plugs straight into <b>Phaser, PixiJS, Godot, Unity</b> or your own engine loader.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  ATLAS FORGE ——- forged with <span class="coin">♥</span> &amp; pixels for game devs ——- © 2026 ——- INSERT COIN <span class="coin blink">▮</span>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ============ helpers ============ */
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400);}
+function statHTML(l,v){return `<div class="stat"><b>${l}</b><span>${v}</span></div>`;}
+
+/* ============ sfx ============ */
+const SFX=(()=>{let ctx=null,on=true;
+  function beep(f,d,t,v){if(!on)return;try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type=t||'square';o.frequency.value=f||520;
+    g.gain.setValueAtTime(v||.04,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+(d||.07));
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+(d||.07));}catch(e){}}
+  document.addEventListener('click',e=>{if(e.target.closest('button,a'))beep(660,.06);});
+  return{beep,toggle(){on=!on;return on;},get on(){return on;}};})();
+$('#sfxBtn').addEventListener('click',()=>{const on=SFX.toggle();const b=$('#sfxBtn');b.textContent=on?'SFX:ON':'SFX:OFF';b.classList.toggle('off',!on);});
+
+/* ============ demo sprites (pixel ascii) ============ */
+const PAL={R:'#ff004d',r:'#ff77a8',O:'#ffa300',Y:'#ffec27',G:'#00e436',g:'#008751',B:'#29adff',b:'#1d2b53',W:'#fff1e8',K:'#000000',P:'#7e2553',A:'#ab5236',a:'#ffccaa',C:'#c2c3c7',S:'#5f574f'};
+const DEMO=[
+{n:'heart',r:["................","..RRRR....RRRR..",".RRrRRR..RRRrRR.","RRrRRRRRRRRRRrRR","RRRRRRRRRRRRRRRR","RRRRRRRRRRRRRRRR",".RRRRRRRRRRRRRR.","..RRRRRRRRRRRR..","...RRRRRRRRRR...","....RRRRRRRR....",".....RRRRRR.....","......RRRR......",".......RR......."]},
+{n:'coin',r:["....YYYY....","..YYOOOOYY..",".YOOOOOOOOY.","YOOOYYYYOOOY","YOOYYOOYYOOY","YOYOOOOOOYOY","YOYOOOOOOYOY","YOOYYOOYYOOY","YOOOYYYYOOOY",".YOOOOOOOOY.","..YYOOOOYY..","....YYYY...."]},
+{n:'slime',r:[".....GGGG.....","...GGGGGGGG...","..GGGGGGGGGG..",".GGGGGGGGGGGG.",".GWWGGGGGWWGG.",".GWKGGGGGWKGG.","GGGGGKKKGGGGGG","GggGGGGGGGGggG",".gggggggggggg.","...gggggggg..."]},
+{n:'sword',r:["...C...","..CWC..","..CWC..","..CWC..","..CWC..","..CWC..","..CWC..","..CWC..","..CWC..",".YYYYY.","YYYYYYY","..AAA..","..AAA..","..AAA..","...Y..."]},
+{n:'potion',r:["....AA....","....AA....","...WWWW...","...W..W...","..W....W..",".W..BB..W.",".W.WBBBBW.","W.BBBBBB.W","W.BBBbBB.W","W.BBBBBB.W","W.BbBBBb.W",".W.BBBB.W.","..WWWWWW.."]},
+{n:'shield',r:["CCCCCCCCCCCC","CBBBBBBBBBBC","CBBBYYYYBBBC","CBBBYYYYBBBC","CBBBBYYBBBBC","CBBBBYYBBBBC",".CBBBYYBBBC.",".CBBBYYBBBC.","..CBBYYBBC..","..CBBBBBBC..","...CBBBBC...","....CBBC....",".....CC....."]},
+{n:'key',r:[".YYYY.........","YY..YY........","YY..YY........",".YYYYYYYYYYYY.","YY..YY.....YY."]},
+{n:'skull',r:["...WWWWWW...","..WWWWWWWW..",".WWWWWWWWWW.",".WWKKWWKKWW.",".WWKKWWKKWW.",".WWWWKKWWWW.",".WWWWWWWWWW.","..WWWWWWWW..","..WKWKWKWW..","..WWWWWWWW.."]},
+{n:'mushroom',r:["....RRRR....","..RRRRRRRR..",".RRWWRRWWRR.","RRWWRRRRWWRR","RRRRRRRRRRRR","rrrrrrrrrrrr","...aaaaaa...","...aWaaWa...","...aaaaaa...","...aaaaaa...","..aaaaaaaa.."]},
+{n:'gem',r:["...BBBBBB...","..BBBBBBBB..",".BBWWBBBBBB.","BBWBBBBBBBBB","BBBBBBBBBBbB",".BBBBBBBBb..","..BBBBBBb...","...BBBbb....","....Bbb.....",".....b......"]},
+{n:'star',r:["......Y......",".....YYY.....",".....YYY.....","YYYYYYYYYYYYY",".YYYYYYYYYYY.","..YYYYYYYYY..","...YYYYYYY...","..YYY...YYY..","..YY.....YY..",".YY.......YY."]},
+{n:'chest',r:[".AAAAAAAAAAAA.","AAAAAAAAAAAAAA","AAYYYYYYYYYYAA","AAAYYYKKYYYYAA","AAAYYKKKKYYAAA","AAAAAAAAAAAAAA","AAAAAAAAAAAAAA","AASAAAAASAAAAA","AASAAAAASAAAAA",".AAAAAAAAAAAA."]}
+];
+function demoCanvas(rows){const h=rows.length,w=Math.max(...rows.map(r=>r.length));
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  rows.forEach((row,j)=>{for(let i=0;i<row.length;i++){const col=PAL[row[i]];if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}});return c;}
+
+/* ============ state ============ */
+const state={pack:null,analysis:null};
+let sprites=[],sid=0,anaImg=null,anaName='atlas';
+
+/* ============ sprite input ============ */
+function addSprite(canvas,name){sprites.push({id:++sid,name,w:canvas.width,h:canvas.height,canvas});renderSprites();}
+function renderSprites(){const list=$('#spriteList');list.innerHTML='';
+  sprites.forEach(s=>{const item=el('div','sp-item');
+    const th=el('canvas');th.width=s.w;th.height=s.h;th.getContext('2d').drawImage(s.canvas,0,0);
+    item.append(th,el('div','sp-meta',`<span class="sp-name">${esc(s.name)}</span><span class="sp-size">${s.w}×${s.h}</span>`));
+    const rm=el('button','sp-x','✕');rm.onclick=()=>{sprites=sprites.filter(q=>q.id!==s.id);renderSprites();SFX.beep(220,.08);};
+    item.append(rm);list.append(item);});
+  $('#spriteCount').textContent=`${sprites.length} sprite${sprites.length===1?'':'s'} loaded`;}
+function loadFiles(files){[...files].forEach(f=>{if(!f.type.startsWith('image/'))return;
+  const url=URL.createObjectURL(f);const img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
+    c.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);
+    if(c.width>4096||c.height>4096){toast('⚠ SKIPPED ( >4096px ): '+f.name);return;}
+    addSprite(c,f.name.replace(/\.[^.]+$/,''));};
+  img.src=url;});}
+function wireDrop(zone,input,onFiles){
+  ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('dragover');}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('dragover');}));
+  zone.addEventListener('drop',e=>onFiles(e.dataTransfer.files));
+  input.addEventListener('change',e=>{onFiles(e.target.files);input.value='';';'});}
+wireDrop($('#packDrop'),$('#packFiles'),loadFiles);
+$('#packBrowse').onclick=()=>$('#packFiles').click();
+$('#loadDemo').onclick=()=>{DEMO.forEach(d=>addSprite(demoCanvas(d.r),d.n));toast('✔ 12 DEMO SPRITES LOADED');};
+$('#clearSprites').onclick=()=>{sprites=[];renderSprites();};
+
+/* ============ packer core ============ */
+function trimCanvas(src){const w=src.width,h=src.height;
+  const d=src.getContext('2d').getImageData(0,0,w,h).data;
+  let minx=w,miny=h,maxx=-1,maxy=-1;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(d[(y*w+x)*4+3]>0){if(x<minx)minx=x;if(x>maxx)maxx=x;if(y<miny)miny=y;if(y>maxy)maxy=y;}}
+  if(maxx<0)return{canvas:src,trimmed:false,sx:0,sy:0,sw:w,sh:h,ow:w,oh:h};
+  const sw=maxx-minx+1,sh=maxy-miny+1;
+  const c=document.createElement('canvas');c.width=sw;c.height=sh;
+  c.getContext('2d').drawImage(src,minx,miny,sw,sh,0,0,sw,sh);
+  return{canvas:c,trimmed:true,sx:minx,sy:miny,sw,sh,ow:w,oh:h};}
+function rotateCW(src){const c=document.createElement('canvas');c.width=src.height;c.height=src.width;
+  const x=c.getContext('2d');x.translate(c.width,0);x.rotate(Math.PI/2);x.drawImage(src,0,0);return c;}
+function packMaxRects(W,H,items,allowRot){
+  let free=[{x:0,y:0,w:W,h:H}];const placed=[];
+  for(const it of items){let best=null;
+    for(const f of free){
+      if(it.w<=f.w&&it.h<=f.h){const sh=Math.min(f.w-it.w,f.h-it.h),lo=Math.max(f.w-it.w,f.h-it.h);
+        if(!best||sh<best.sh||(sh===best.sh&&lo<best.lo))best={f,rot:false,sh,lo};}
+      if(allowRot&&it.h<=f.w&&it.w<=f.h){const sh=Math.min(f.w-it.h,f.h-it.w),lo=Math.max(f.w-it.h,f.h-it.w);
+        if(!best||sh<best.sh||(sh===best.sh&&lo<best.lo))best={f,rot:true,sh,lo};}}
+    if(!best)return null;
+    const rw=best.rot?it.h:it.w,rh=best.rot?it.w:it.h;
+    const p={x:best.f.x,y:best.f.y,w:rw,h:rh};
+    placed.push(Object.assign({},it,{x:p.x,y:p.y,rot:best.rot,rw,rh}));
+    const nf=[];
+    for(const f of free){
+      if(!(p.x<f.x+f.w&&f.x<p.x+p.w&&p.y<f.y+f.h&&f.y<p.y+p.h)){nf.push(f);continue;}
+      if(p.x>f.x)nf.push({x:f.x,y:f.y,w:p.x-f.x,h:f.h});
+      if(p.x+p.w<f.x+f.w)nf.push({x:p.x+p.w,y:f.y,w:f.x+f.w-p.x-p.w,h:f.h});
+      if(p.y>f.y)nf.push({x:f.x,y:f.y,w:f.w,h:p.y-f.y});
+      if(p.y+p.h<f.y+f.h)nf.push({x:f.x,y:p.y+p.h,w:f.w,h:f.y+f.h-p.y-p.h});}
+    free=[];
+    outer:for(let i=0;i<nf.length;i++){for(let j=0;j<nf.length;j++){if(i!==j&&nf[i].x>=nf[j].x&&nf[i].y>=nf[j].y&&nf[i].x+nf[i].w<=nf[j].x+nf[j].w&&nf[i].y+nf[i].h<=nf[j].y+nf[j].h)continue outer;}free.push(nf[i]);}}
+  return placed;}
+function forgeAtlas(){
+  if(!sprites.length){toast('⚠ NO SPRITES LOADED');return;}
+  const pad=+$('#optPad').value,ext=Math.min(+$('#optExt').value,+$('#optPad').value),
+        pot=$('#optPot').checked,rot=$('#optRot').checked,trim=$('#optTrim').checked,sizeMode=$('#optSize').value;
+  const items=sprites.map(s=>{const t=trim?trimCanvas(s.canvas):{canvas:s.canvas,trimmed:false,sx:0,sy:0,sw:s.w,sh:s.h,ow:s.w,oh:s.h};
+    return{name:s.name,src:t.canvas,trim:t,w:t.canvas.width+pad,h:t.canvas.height+pad};});
+  items.sort((a,b)=>Math.max(b.w,b.h)-Math.max(a.w,a.h)||(b.w*b.h-a.w*a.h));
+  let placed=null,W=0,H=0;
+  if(sizeMode==='auto'){for(const s of [64,128,256,512,1024,2048,4096]){const r=packMaxRects(s,s,items,rot);if(r){placed=r;W=H=s;break;}}}
+  else{W=H=+sizeMode;placed=packMaxRects(W,H,items,rot);}
+  if(!placed){toast('⚠ ATLAS OVERFLOW — RAISE SIZE / LOWER PADDING');return;}
+  let maxX=0,maxY=0;placed.forEach(p=>{maxX=Math.max(maxX,p.x+p.rw);maxY=Math.max(maxY,p.y+p.rh);});
+  if(!pot){W=Math.max(1,maxX);H=Math.max(1,maxY);}
+  const cv=$('#packCanvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,W,H);ctx.imageSmoothingEnabled=false;
+  for(const p of placed){
+    const draw=p.rot?rotateCW(p.src):p.src,dx=p.x,dy=p.y,sw=draw.width,sh=draw.height;
+    ctx.drawImage(draw,dx,dy);
+    for(let k=1;k<=ext;k++){
+      ctx.drawImage(draw,0,0,1,sh,dx-k,dy,1,sh);
+      ctx.drawImage(draw,sw-1,0,1,sh,dx+sw+k-1,dy,1,sh);
+      ctx.drawImage(draw,0,0,sw,1,dx,dy-k,sw,1);
+      ctx.drawImage(draw,0,sh-1,sw,1,dx,dy+sh+k-1,sw,1);
+      ctx.drawImage(draw,0,0,1,1,dx-k,dy-k,1,1);
+      ctx.drawImage(draw,sw-1,0,1,1,dx+sw+k-1,dy-k,1,1);
+      ctx.drawImage(draw,0,sh-1,1,1,dx-k,dy+sh+k-1,1,1);
+      ctx.drawImage(draw,sw-1,sh-1,1,1,dx+sw+k-1,dy+sh+k-1,1,1);}}
+  const area=placed.reduce((a,p)=>a+p.src.width*p.src.height,0);
+  const eff=Math.max(1,Math.round(area/(W*H)*100));
+  $('#packStats').innerHTML=statHTML('ATLAS',W+'×'+H)+statHTML('SPRITES',placed.length)+statHTML('EFFICIENCY',eff+'%')+statHTML('POT',pot?'YES':'NO');
+  state.pack={W,H,placed,pad};
+  ['dlPng','dlJson','copyJson'].forEach(id=>$('#'+id).disabled=false);
+  toast('✔ ATLAS FORGED '+W+'×'+H);SFX.beep(880,.12,'square',.05);}
+
+function buildPackJSON(fmt){const {W,H,placed}=state.pack;
+  const meta={app:'ATLAS FORGE v2.6',image:'atlas.png',format:'RGBA8888',size:{w:W,h:H},scale:'1'};
+  const entry=p=>({frame:{x:p.x,y:p.y,w:p.rw,h:p.rh},rotated:p.rot,trimmed:p.trim.trimmed,
+    spriteSourceSize:{x:p.trim.sx,y:p.trim.sy,w:p.trim.sw,h:p.trim.sh},sourceSize:{w:p.trim.ow,h:p.trim.oh}});
+  if(fmt==='hash'){const frames={};placed.forEach(p=>frames[p.name+'.png']=entry(p));return{frames,meta};}
+  if(fmt==='array'){return{frames:placed.map(p=>Object.assign({filename:p.name+'.png'},entry(p))),meta};}
+  return{image:'atlas.png',size:{w:W,h:H},frames:placed.map(p=>({name:p.name,x:p.x,y:p.y,w:p.src.width,h:p.src.height,rotated:p.rot}))};}
+
+/* ============ downloads ============ */
+function dlCanvas(c,name){c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);});}
+function dlJSON(o,name){const b=new Blob([JSON.stringify(o,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);}
+function copyJSON(o){const txt=JSON.stringify(o,null,2);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast('✔ JSON COPIED')).catch(()=>toast('⚠ COPY FAILED'));}
+  else{const ta=el('textarea');ta.value=txt;document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();toast('✔ JSON COPIED');}}
+$('#packBtn').onclick=forgeAtlas;
+$('#dlPng').onclick=()=>{if(state.pack)dlCanvas($('#packCanvas'),'atlas.png');};
+$('#dlJson').onclick=()=>{if(state.pack)dlJSON(buildPackJSON($('#jsonFormat').value),'atlas.json');};
+$('#copyJson').onclick=()=>{if(state.pack)copyJSON(buildPackJSON($('#jsonFormat').value));};
+
+/* ============ analyzer ============ */
+function setAnaImage(img,name){anaImg=img;anaName=name;state.analysis=null;
+  const c=$('#anaCanvas');c.width=img.width;c.height=img.height;
+  const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,img.width,img.height);x.drawImage(img,0,0);
+  $('#anaStats').innerHTML='';$('#anaTableBody').innerHTML='';
+  ['anaDlJson','anaCopyJson','anaDlPng'].forEach(id=>$('#'+id).disabled=true);
+  $('#anaStatus').textContent=`X:— Y:— // ATLAS ${img.width}×${img.height} LOADED`;
+  toast('ATLAS LOADED '+img.width+'×'+img.height);}
+wireDrop($('#anaDrop'),$('#anaFiles'),files=>{const f=[...files].find(f=>f.type.startsWith('image/'));if(!f)return;
+  const url=URL.createObjectURL(f);const img=new Image();
+  img.onload=()=>{setAnaImage(img,f.name);URL.revokeObjectURL(url);};img.src=url;});
+$('#anaBrowse').onclick=()=>$('#anaFiles').click();
+$('#usePackBtn').onclick=()=>{if(!state.pack){toast('⚠ FORGE AN ATLAS FIRST (001)');return;}
+  const img=new Image();img.onload=()=>setAnaImage(img,'forged_atlas.png');img.src=$('#packCanvas').toDataURL();};
+$('#anaMode').addEventListener('change',()=>{$('#tolRow').style.opacity=$('#anaMode').value==='key'?1:.35;});
+
+function analyze(){
+  if(!anaImg){toast('⚠ NO ATLAS LOADED');return;}
+  const w=anaImg.width,h=anaImg.height;
+  if(w*h>4096*4096){toast('⚠ ATLAS TOO LARGE (>4096²)');return;}
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.drawImage(anaImg,0,0);
+  const data=x.getImageData(0,0,w,h).data;
+  const mode=$('#anaMode').value,alphaT=+$('#anaAlpha').value,tol=+$('#anaTol').value,gap=+$('#anaGap').value,minA=+$('#anaMin').value;
+  let bg=[0,0,0];
+  if(mode==='key'){let r=0,g=0,b=0;[[0,0],[w-1,0],[0,h-1],[w-1,h-1]].forEach(([px,py])=>{const i=(py*w+px)*4;r+=data[i];g+=data[i+1];b+=data[i+2];});bg=[r/4,g/4,b/4];}
+  const fg=new Uint8Array(w*h);const tol2=tol*tol*3;let fgCount=0;
+  for(let p=0,i=0;p<w*h;p++,i+=4){
+    const a=data[i+3];
+    if(a<alphaT){fg[p]=0;continue;}
+    if(mode==='key'){const dr=data[i]-bg[0],dg=data[i+1]-bg[1],db=data[i+2]-bg[2];
+      fg[p]=(dr*dr+dg*dg+db*db)>tol2?1:0;}
+    else fg[p]=1;
+    fgCount+=fg[p];}
+  /* flood-fill connected components, frame by frame */
+  const seen=new Uint8Array(w*h);const boxes=[];
+  for(let start=0;start<w*h;start++){
+    if(!fg[start]||seen[start])continue;
+    const q=[start];seen[start]=1;let top=0,area=0,minx=w,maxx=0,miny=h,maxy=0;
+    while(top<q.length){const p=q[top++];const px=p%w,py=(p/w)|0;area++;
+      if(px<minx)minx=px;if(px>maxx)maxx=px;if(py<miny)miny=py;if(py>maxy)maxy=py;
+      if(px>0&&fg[p-1]&&!seen[p-1]){seen[p-1]=1;q.push(p-1);}
+      if(px<w-1&&fg[p+1]&&!seen[p+1]){seen[p+1]=1;q.push(p+1);}
+      if(py>0&&fg[p-w]&&!seen[p-w]){seen[p-w]=1;q.push(p-w);}
+      if(py<h-1&&fg[p+w]&&!seen[p+w]){seen[p+w]=1;q.push(p+w);}}
+    if(area>=minA)boxes.push({x:minx,y:miny,w:maxx-minx+1,h:maxy-miny+1,area});}
+  /* merge frames closer than gap */
+  let merged=true;
+  while(merged){merged=false;
+    outer:for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
+      const a=boxes[i],b=boxes[j];
+      if(a.x-gap<=b.x+b.w&&b.x-gap<=a.x+a.w&&a.y-gap<=b.y+b.h&&b.y-gap<=a.y+a.h){
+        const nx=Math.min(a.x,b.x),ny=Math.min(a.y,b.y),nx2=Math.max(a.x+a.w,b.x+b.w),ny2=Math.max(a.y+a.h,b.y+b.h);
+        boxes[i]={x:nx,y:ny,w:nx2-nx,h:ny2-ny,area:a.area+b.area};boxes.splice(j,1);merged=true;break outer;}}}
+  boxes.sort((a,b)=>a.y-b.y||a.x-b.x);
+  state.analysis={boxes,w,h};
+  drawAna(-1);renderAnaTable();
+  const cov=Math.round(fgCount/(w*h)*100);
+  $('#anaStats').innerHTML=statHTML('FRAMES',boxes.length)+statHTML('ATLAS',w+'×'+h)+statHTML('COVERAGE',cov+'%')+statHTML('MODE',mode==='key'?'COLOR':'ALPHA');
+  ['anaDlJson','anaCopyJson','anaDlPng'].forEach(id=>$('#'+id).disabled=false);
+  toast('✔ '+boxes.length+' FRAMES DETECTED');SFX.beep(990,.12,'square',.05);}
+$('#analyzeBtn').onclick=analyze;
+
+function drawAna(hl){if(!state.analysis)return;
+  const {boxes,w,h}=state.analysis;
+  const c=$('#anaCanvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,w,h);x.drawImage(anaImg,0,0);
+  const lw=Math.max(1,Math.round(Math.min(w,h)/512));
+  const fs=Math.max(9,Math.round(Math.min(w,h)/48));
+  boxes.forEach((b,i)=>{
+    const col=`hsl(${(i*47)%360} 90% 60%)`;
+    x.strokeStyle=hl===i?'#ff004d':col;x.lineWidth=hl===i?lw*2:lw;
+    x.strokeRect(b.x+.5,b.y+.5,Math.max(1,b.w-1),Math.max(1,b.h-1));
+    x.font=fs+'px monospace';x.textBaseline='top';
+    const label=String(i+1);
+    x.fillStyle='#000';x.fillText(label,b.x+3,b.y+3);
+    x.fillStyle=hl===i?'#ff004d':col;x.fillText(label,b.x+2,b.y+2);});}
+
+function renderAnaTable(){const {boxes}=state.analysis;const tb=$('#anaTableBody');tb.innerHTML='';
+  const max=Math.min(boxes.length,500);
+  for(let i=0;i<max;i++){const b=boxes[i];
+    const tr=el('tr','',`<td>${i+1}</td><td>frame_${String(i+1).padStart(4,'0')}</td><td>${b.x}</td><td>${b.y}</td><td>${b.w} × ${b.h}</td><td>${b.area}</td>`);
+    tr.addEventListener('mouseenter',()=>drawAna(i));
+    tr.addEventListener('mouseleave',()=>drawAna(-1));
+    tb.append(tr);}
+  if(boxes.length>500)tb.append(el('tr','',`<td colspan="6">… +${boxes.length-500} more frames</td>`));}
+
+function anaJSON(){const {boxes,w,h}=state.analysis;
+  return{meta:{app:'ATLAS FORGE ANALYZER v2.6',image:anaName,size:{w,h},frameCount:boxes.length},
+    frames:boxes.map((b,i)=>({name:'frame_'+String(i+1).padStart(4,'0'),frame:{x:b.x,y:b.y,w:b.w,h:b.h},sourceSize:{w:b.w,h:b.h},pixels:b.area}))};}
+$('#anaDlJson').onclick=()=>{if(state.analysis)dlJSON(anaJSON(),'atlas_frames.json');};
+$('#anaCopyJson').onclick=()=>{if(state.analysis)copyJSON(anaJSON());};
+$('#anaDlPng').onclick=()=>{if(state.analysis)dlCanvas($('#anaCanvas'),'atlas_annotated.png');};
+
+$('#anaCanvas').addEventListener('mousemove',e=>{
+  if(!state.analysis)return;
+  const c=e.currentTarget,r=c.getBoundingClientRect();
+  const x=Math.floor((e.clientX-r.left)*c.width/r.width),y=Math.floor((e.clientY-r.top)*c.height/r.height);
+  let hit=-1;state.analysis.boxes.forEach((b,i)=>{if(x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h)hit=i;});
+  const b=hit>=0?state.analysis.boxes[hit]:null;
+  $('#anaStatus').textContent=`X:${x} Y:${y} // `+(b?`FRAME #${hit+1} — ${b.w}×${b.h}px`:'EMPTY SPACE');});
+$('#anaCanvas').addEventListener('mouseleave',()=>{$('#anaStatus').textContent='X:— Y:— // hover to inspect frames';});
+
+/* ============ range readouts ============ */
+[['optPad','optPadV'],['optExt','optExtV'],['anaAlpha','anaAlphaV'],['anaTol','anaTolV'],['anaGap','anaGapV'],['anaMin','anaMinV']]
+.forEach(([a,b])=>{const r=$('#'+a),o=$('#'+b);const f=()=>o.value=r.value;r.addEventListener('input',f);f();});
+
+/* ============ placeholders ============ */
+function placeholder(cv,txt){const x=cv.getContext('2d');x.imageSmoothingEnabled=false;
+  x.fillStyle='#0d1026';x.fillRect(0,0,cv.width,cv.height);
+  x.strokeStyle='rgba(43,50,99,.6)';x.lineWidth=1;
+  for(let gx=0;gx<cv.width;gx+=16){x.beginPath();x.moveTo(gx+.5,0);x.lineTo(gx+.5,cv.height);x.stroke();}
+  for(let gy=0;gy<cv.height;gy+=16){x.beginPath();x.moveTo(0,gy+.5);x.lineTo(cv.width,gy+.5);x.stroke();}
+  x.font='10px "Press Start 2P", monospace';x.textAlign='center';x.textBaseline='middle';
+  x.fillStyle='#2b3263';x.fillText(txt,cv.width/2+2,cv.height/2+2);
+  x.fillStyle='#9aa0c3';x.fillText(txt,cv.width/2,cv.height/2);}
+placeholder($('#packCanvas'),'AWAITING FORGE…');
+placeholder($('#anaCanvas'),'AWAITING ATLAS…');
+</script>
+</body>
+</html>
