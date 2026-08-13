@@ -44,18 +44,6 @@
 
 ---
 
-## 🎨 Design
-
-Styled after **Henry Northington's portfolio** with:
-- Retro pixel aesthetic
-- CRT scanline overlay
-- 8-bit fonts (Press Start 2P, VT323)
-- Terminal-style UI
-- Grid background pattern
-- Glitch effects
-
----
-
 ## 🚀 How to Use
 
 ### Pack Sprites
